@@ -1,7 +1,4 @@
 import java.awt.AWTException;
-import java.awt.event.KeyEvent;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
@@ -21,8 +18,7 @@ public class CatchValidateThread extends Thread {
 			}
 			while(!Main.checkForDone(currentImage));
 
-			Main.now = LocalDateTime.now();
-			System.out.println(Main.dtf.format(Main.now) + " found done");
+			Main.logger.info(" found done");
 			Main.doneThread = true;
 			Main.tensionThread = true;
 			this.interrupt();

@@ -1,7 +1,4 @@
 import java.awt.AWTException;
-import java.awt.event.KeyEvent;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
@@ -19,8 +16,7 @@ public class TensionValidateThread extends Thread {
 			}
 			while(!Main.checkForTension(currentImage));
 
-			Main.now = LocalDateTime.now();
-			System.out.println(Main.dtf.format(Main.now) + " found tension warning");
+			Main.logger.info(" found tension warning");
 			Main.tensionThread = true;
 			this.interrupt();
 
