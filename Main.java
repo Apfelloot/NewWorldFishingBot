@@ -16,6 +16,8 @@ import java.util.logging.SimpleFormatter;
 
 import javax.imageio.ImageIO;
 
+import java.awt.event.KeyEvent;
+
 public class Main {
 
 	private static Robot r;
@@ -41,8 +43,6 @@ public class Main {
 		int amountPixelCurrentPc = width*height;
 		factorPixel = amountPixelCurrentPc / amountPixelFullhd;
 
-		System.out.println(amountPixelFullhd + " " + amountPixelCurrentPc + " " + factorPixel);
-
 		logger = Logger.getLogger("MyLog");  
 		FileHandler fh;  
 
@@ -63,6 +63,7 @@ public class Main {
 
 		outerLoop:
 			while(true) {
+
 
 				miss = false;
 				doneThread = false;
@@ -90,6 +91,45 @@ public class Main {
 						}
 					}
 					while(!checkForStart(currentImage));
+
+					if(checkForRepair(takeScreenshotRepair())) {
+
+						r.keyPress(KeyEvent.VK_TAB);
+						r.keyRelease(KeyEvent.VK_TAB);
+						Thread.sleep(1000);
+						if(checkForInventory(takeScreenshotInventory())) {
+							r.mouseMove(870, 670);
+							Thread.sleep(1000);
+							r.keyPress(KeyEvent.VK_R);
+							Thread.sleep(1000);
+							r.mousePress(InputEvent.BUTTON1_MASK);
+							r.mouseRelease(InputEvent.BUTTON1_MASK);
+							Thread.sleep(1000);
+							r.keyRelease(KeyEvent.VK_R);
+							Thread.sleep(1000);
+							r.keyPress(KeyEvent.VK_E);
+							r.keyRelease(KeyEvent.VK_E);
+							Thread.sleep(1000);
+							r.keyPress(KeyEvent.VK_TAB);
+							r.keyRelease(KeyEvent.VK_TAB);
+							Thread.sleep(1000);
+
+							logger.info("repaired fishing rod");
+						}
+
+						else {
+
+							r.keyPress(KeyEvent.VK_TAB);
+							r.keyRelease(KeyEvent.VK_TAB);
+							Thread.sleep(1000);
+							logger.info("couldnt open inventory");
+						}
+
+						r.keyPress(KeyEvent.VK_F3);
+						r.keyRelease(KeyEvent.VK_F3);
+						Thread.sleep(1000);
+
+					}
 
 					logger.info(" found start");	
 
@@ -197,15 +237,30 @@ public class Main {
 
 	public static BufferedImage takeScreenshotMiss() throws AWTException {
 
-		Rectangle capture = new Rectangle((int)(width*0.34375),(int)(height*0.66703),(int)(width*0.32291),(int)(height*0.04166));
+		Rectangle capture = new Rectangle((int)(width*0.34375),(int)(height*0.66703),(int)(width*0.32291)+1,(int)(height*0.04166)+1);
 		//		Rectangle capture = new Rectangle(660,715,620,45);
+		return r.createScreenCapture(capture);
+
+	}
+
+	public static BufferedImage takeScreenshotInventory() throws AWTException {
+
+		Rectangle capture = new Rectangle((int)(width*0.27500),(int)(height*0.87870),(int)(width*0.19219)+1,(int)(height*0.01204)+1);
+		//		Rectangle capture = new Rectangle(528,949,369,13);
+		return r.createScreenCapture(capture);
+
+	}
+
+	public static BufferedImage takeScreenshotRepair() throws AWTException {
+
+		Rectangle capture = new Rectangle((int)(width*0.88020),(int)(height*0.95648),(int)(width*0.09166)+1,(int)(height*0.00185)+1);
 		return r.createScreenCapture(capture);
 
 	}
 
 	public static BufferedImage takeScreenshotTension() throws AWTException {
 
-		Rectangle capture = new Rectangle((int)(width*0.41667),(int)(height*0),(int)(width*0.18229),(int)(height*1));
+		Rectangle capture = new Rectangle((int)(width*0.41667),(int)(height*0),(int)(width*0.18229)+1,(int)(height*1)+1);
 		//		Rectangle capture = new Rectangle(800,0,350,1080);
 		//		System.out.println(((int)(width*0.41667) + " " + (int)(height*0) + " " + (int)(width*0.18229) + " " + (int)(height*100)));
 		return r.createScreenCapture(capture);
@@ -214,7 +269,7 @@ public class Main {
 
 	public static BufferedImage takeScreenshotCatch() throws AWTException {
 
-		Rectangle capture = new Rectangle((int)(width*0.50521),0,(int)(width*0.02604),(int)(height*0.12037));
+		Rectangle capture = new Rectangle((int)(width*0.50521),0,(int)(width*0.02604)+1,(int)(height*0.12037)+1);
 		//		Rectangle capture = new Rectangle(870,0,170,140);
 		//		Rectangle capture = new Rectangle(970,0,50,130);
 		return r.createScreenCapture(capture);
@@ -223,7 +278,7 @@ public class Main {
 
 	public static BufferedImage takeScreenshotDone() throws AWTException {
 
-		Rectangle capture = new Rectangle((int)(width*0.54167),(int)(height*0.50926),(int)(width*0.03646),(int)(height*0.05556));
+		Rectangle capture = new Rectangle((int)(width*0.54167),(int)(height*0.50926),(int)(width*0.03646)+1,(int)(height*0.05556)+1);
 		//		Rectangle capture = new Rectangle(1040,550,70,60);
 		return r.createScreenCapture(capture);
 
@@ -231,17 +286,93 @@ public class Main {
 
 	public static BufferedImage takeScreenshotStart() throws AWTException {
 
-		Rectangle capture = new Rectangle((int)(width*0.54271),(int)(height*0.69352),(int)(width*0.01823),(int)(height*0.03056));
+		Rectangle capture = new Rectangle((int)(width*0.54271),(int)(height*0.69352),(int)(width*0.01823)+1,(int)(height*0.03056)+1);
 		//		Rectangle capture = new Rectangle(1042,749,35,33);
 		return r.createScreenCapture(capture);
 
 	}
 
+	public static boolean checkForInventory(BufferedImage bImage) throws IOException {		
+
+		int counterYellow = 0;
+		int counterTotal = 0;
+
+							File outputfile = new File("image.jpg");
+							ImageIO.write(bImage, "jpg", outputfile);
+		
+		for(int x = 1; x<= (int)(width*0.19219) ; x++) {
+
+			for(int y = 1; y<=(int)(height*0.01204) ; y++) {
+
+				int pixelB = bImage.getRGB(x, y);
+				Color color = new Color(pixelB, true);
+				int red = color.getRed();
+				int green = color.getGreen();
+				int blue = color.getBlue();  
+
+				if(red > 121 && green > 107 && blue > 42 && red < 224 && green < 195 && blue < 83) {
+
+					counterYellow++;
+
+				}
+				counterTotal++;
+
+			}
+
+		}
+
+		if(( (double)counterYellow/(double)counterTotal ) >= 0.6) {
+
+			return true;
+
+		}
+
+		else {
+			return false;
+		}
+
+	}
+
+	public static boolean checkForRepair(BufferedImage bImage) throws IOException {		
+
+		int counterWhite = 0;
+		int counterTotal = 0;
+
+		for(int x = 1; x<= (int)(width*0.09166) ; x++) {
+
+			for(int y = 1; y<=(int)(height*0.00185) ; y++) {
+
+				int pixelB = bImage.getRGB(x, y);
+				Color color = new Color(pixelB, true);
+				int red = color.getRed();
+				int green = color.getGreen();
+				int blue = color.getBlue();  
+
+				if(red == 255 && green == 255 && blue == 255) counterWhite++;
+				counterTotal++;
+
+			}
+
+		}
+
+		if(counterWhite > 0 && (((double)counterWhite/(double)counterTotal) <= 0.05)) {
+
+			return true;
+
+		}
+
+		else {
+
+			return false;
+		}
+
+	}
+
 	public static boolean checkForStart(BufferedImage bImage) throws IOException {		
 
-		for(int x = 1; x< (int)((width*0.01823)-1) ; x++) {
+		for(int x = 1; x<= (int)(width*0.01823) ; x++) {
 
-			for(int y = 1; y<(int)((height*0.03056)-1) ; y++) {
+			for(int y = 1; y<=(int)(height*0.03056) ; y++) {
 
 				int pixelB = bImage.getRGB(x, y);
 				Color color = new Color(pixelB, true);
@@ -261,9 +392,9 @@ public class Main {
 
 	public static boolean checkForMiss(BufferedImage bImage) throws IOException {
 
-		for(int x = 1; x< (int)((width*0.01823)-1) ; x++) {
+		for(int x = 1; x<= (int)(width*0.01823) ; x++) {
 
-			for(int y = 1; y<(int)((height*0.03056)-1) ; y++) {
+			for(int y = 1; y<=(int)(height*0.03056) ; y++) {
 
 				int pixelB = bImage.getRGB(x, y);
 				Color color = new Color(pixelB, true);
@@ -288,9 +419,9 @@ public class Main {
 
 		int count = 0;
 
-		for(int x = 1; x< (int)((width*0.02604)-1) ; x++) {
+		for(int x = 1; x<= (int)(width*0.02604) ; x++) {
 
-			for(int y = 1; y<(int)((height*0.12037)-1) ; y++) {
+			for(int y = 1; y<=(int)(height*0.12037) ; y++) {
 
 				int pixelB = bImage.getRGB(x, y);
 				Color color = new Color(pixelB, true);
@@ -322,9 +453,9 @@ public class Main {
 
 		int count = 0;
 
-		for(int x = 1; x< (int)((width*0.02604)-1) ; x++) {
+		for(int x = 1; x<= (int)(width*0.02604) ; x++) {
 
-			for(int y = 1; y<(int)((height*0.12037)-1) ; y++) {
+			for(int y = 1; y<=(int)(height*0.12037) ; y++) {
 
 				int pixelB = bImage.getRGB(x, y);
 				Color color = new Color(pixelB, true);
@@ -345,9 +476,9 @@ public class Main {
 
 	public static boolean checkForTension(BufferedImage bImage) throws IOException {		
 
-		for(int x = 1; x< 350-1 ; x++) {
+		for(int x = 1; x<= (int)(width*0.18229) ; x++) {
 
-			for(int y = 1; y<1080-1 ; y++) {
+			for(int y = 1; y<=height ; y++) {
 
 				int pixelB = bImage.getRGB(x, y);
 				Color color = new Color(pixelB, true);
@@ -356,7 +487,7 @@ public class Main {
 				int green = color.getGreen();
 				int blue = color.getBlue();  
 
-				if(red > 242 && green > 117 && blue > 26 && red < 252 && green < 127 && blue < 36) {
+				if(red > 242 && green > 117 && blue > 25 && red < 252 && green < 127 && blue < 36) {
 					//					System.out.println(red + " " + green + " " + blue + " at " + x + "," + y);
 					return true;
 				}
@@ -371,9 +502,9 @@ public class Main {
 
 	public static boolean checkForDone(BufferedImage bImage) throws IOException {		
 
-		for(int x = 1; x < (int)((width*0.03646)-1) ; x++) {
+		for(int x = 1; x <=(int)(width*0.03646) ; x++) {
 
-			for(int y = 1; y < (int)((height*0.05556)-1) ; y++) {
+			for(int y = 1; y <= (int)(height*0.05556) ; y++) {
 
 				int pixelB = bImage.getRGB(x, y);
 				Color color = new Color(pixelB, true);
